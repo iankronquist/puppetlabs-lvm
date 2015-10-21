@@ -91,9 +91,9 @@ describe Puppet::Type.type(:logical_volume) do
         :ensure       => :present,
         :volume_group => 'myvg',
         :size         => '10M',
-        :extents       => 'acidburn',
+        :extents      => 'acidburn',
       )
-    }.to raise_error(Puppet::Error,
+    }.to raise_error(Puppet::ResourceError,
                      'Parameter extents failed on Logical_volume[zerocool]: acidburn is not a valid logical volume extent')
   end
 
@@ -104,9 +104,58 @@ describe Puppet::Type.type(:logical_volume) do
         :ensure       => :present,
         :volume_group => 'myvg',
         :size         => '10M',
-        :extents       => '1%vg',
+        :extents      => '1%vg',
+      )
+    }.to_not raise_error
+  end
+
+  it 'persistent which is not true or false raises error' do
+    expect {
+      resource = Puppet::Type.type(:logical_volume).new(
+        :name         => 'simba',
+        :ensure       => :present,
+        :volume_group => 'rafiki',
+        :size         => '10M',
+        :persistent   => 'nala',
+      )
+    }.to raise_error(Puppet::ResourceError,
+                     'Parameter persistent failed on Logical_volume[simba]: persistent must be either be true or false')
+  end
+
+  it 'persistent is true does not raise error' do
+    expect {
+      resource = Puppet::Type.type(:logical_volume).new(
+        :name         => 'simba',
+        :ensure       => :present,
+        :volume_group => 'rafiki',
+        :size         => '10M',
+        :persistent   => :true,
+      )
+    }.to_not raise_error
+  end
+
+  it 'minor not set to integer between 0 and 255 raises error' do
+    expect {
+      resource = Puppet::Type.type(:logical_volume).new(
+        :name         => 'ringo',
+        :ensure       => :present,
+        :volume_group => 'george',
+        :size         => '10M',
+        :minor        => 910
+      )
+    }.to raise_error(Puppet::ResourceError,
+                     'Parameter minor failed on Logical_volume[ringo]: 910 is not a valid value for minor. It must be an integer between 0 and 255')
+  end
+
+  it 'minor not set to integer between 0 and 255 raises error' do
+    expect {
+      resource = Puppet::Type.type(:logical_volume).new(
+        :name         => 'ringo',
+        :ensure       => :present,
+        :volume_group => 'george',
+        :size         => '10M',
+        :minor        => 1
       )
     }.to_not raise_error
   end
 end
-
